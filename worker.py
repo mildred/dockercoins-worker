@@ -14,16 +14,18 @@ else:
     logging.getLogger("requests").setLevel(logging.WARNING)
 
 
-redis = Redis("redis")
+redis = Redis(os.environ.get("REDIS_HOST", "redis.service.consul"))
+rng_host = os.environ.get("RNG_HOST", "rng.service.consul")
+hasher_host = os.environ.get("HASHER_HOST", "hasher.service.consul")
 
 
 def get_random_bytes():
-    r = requests.get("http://rng/32")
+    r = requests.get("http://%s/32" % rng_host)
     return r.content
 
 
 def hash_bytes(data):
-    r = requests.post("http://hasher/",
+    r = requests.post("http://%s/" % hasher_host,
                       data=data,
                       headers={"Content-Type": "application/octet-stream"})
     hex_hash = r.text
